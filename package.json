@@ -9,12 +9,23 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.0",
+    "@hookform/resolvers": "^3.10.0",
+    "@tanstack/react-query": "^5.64.1",
+    "@tanstack/react-query-devtools": "^5.64.1",
     "bcryptjs": "^2.4.3",
+    "chalk": "^5.4.1",
+    "framer-motion": "^11.18.1",
+    "lucide-react": "^0.473.0",
     "mongoose": "^8.9.5",
     "next": "15.1.5",
     "next-auth": "^5.0.0-beta.25",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.54.2",
+    "sonner": "^1.7.2",
+    "winston": "^3.17.0",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

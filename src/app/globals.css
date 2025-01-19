@@ -2,20 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+input {
+	@apply rounded-md text-base md:px-4 px-2 py-2 border border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.normal-button {
+	@apply bg-black text-white px-4 py-2 rounded-md;
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+.normal-button:hover {
+	@apply bg-black/80;
+}
+
+.normal-button:disabled {
+	@apply bg-slate-400;
 }

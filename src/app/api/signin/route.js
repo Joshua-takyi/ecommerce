@@ -1,4 +1,4 @@
-import { SignIn } from "@/server/action";
+import { SignInAction } from "@/server/action";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
@@ -7,7 +7,7 @@ export async function POST(req) {
 		return NextResponse.json({ error: "Invalid request" }, { status: 400 });
 	}
 	try {
-		const res = await SignIn({
+		const res = await SignInAction({
 			email,
 			password,
 		});

@@ -1,4 +1,3 @@
-// logger.js
 import winston from "winston";
 import chalk from "chalk";
 
@@ -43,12 +42,17 @@ const logger = winston.createLogger({
 		new winston.transports.Console({
 			level: "debug", // Log everything up to debug level
 		}),
-		// Log to a file (optional)
+	],
+});
+
+// Add file transport only if it's not in production (for local development)
+if (process.env.NODE_ENV !== "production") {
+	logger.add(
 		new winston.transports.File({
 			filename: "logs/app.log", // Save logs to a file
 			level: "error", // Log only errors to the file
-		}),
-	],
-});
+		})
+	);
+}
 
 export default logger;

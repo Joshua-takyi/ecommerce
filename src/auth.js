@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { UserAuth } from "./models/schema";
 import { connectDb } from "./utils/connect";
+import logger from "./utils/logger";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
 	providers: [
@@ -13,24 +14,30 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 				password: { label: "Password", type: "password" },
 			},
 			async authorize(credentials) {
-				const { email, password } = credentials;
-				await connectDb();
-				const user = await UserAuth.findOne({ email }).select("+password");
-				if (!user) {
-					throw new Error("Invalid email or password");
-				}
-				const isPasswordCorrect = await bcrypt.compare(password, user.password);
-				if (!isPasswordCorrect) {
-					throw new Error("Invalid email or password");
-				}
+				try {
+					const { email, password } = credentials;
+					await connectDb();
+					const user = await UserAuth.findOne({ email }).select("+password");
+					if (!user) {
+						throw new Error("Invalid email or password");
+					}
+					const isPasswordCorrect = await bcrypt.compare(
+						password,
+						user.password
+					);
+					if (!isPasswordCorrect) {
+						throw new Error("Invalid email or password");
+					}
 
-				return {
-					id: user._id,
-					name: user.name,
-					email: user.email,
-					role: user.role,
-					image: user.image,
-				};
+					return {
+						id: user._id,
+						name: user.name,
+						role: user.role,
+					};
+				} catch (error) {
+					logger.error("Error during sign-in:", error);
+					throw new Error("An unexpected error occurred during sign-in");
+				}
 			},
 		}),
 	],
@@ -59,6 +66,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
 		signIn: async ({ user, account }) => {
 			if (account?.provider === "credentials") {
+				logger.info("Sign in with credentials");
 				return true;
 			}
 
@@ -68,6 +76,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 				if (!existingUser) {
 					await UserAuth.create({ email, name, image });
 				}
+				logger.info("Sign in with google");
 				return true;
 			}
 			return false;

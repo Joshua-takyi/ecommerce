@@ -27,6 +27,54 @@ const userAuthSchema = new mongoose.Schema(
 	}
 );
 
+const ReviewSchema = new mongoose.Schema(
+	{
+		user: {
+			ref: "UserAuth",
+			type: mongoose.Schema.Types.ObjectId,
+			required: true,
+		},
+		productId: {
+			ref: "Product",
+			type: mongoose.Schema.Types.ObjectId,
+			required: true,
+		},
+		rating: {
+			type: Number,
+			required: true,
+			min: 1,
+			max: 5,
+		},
+		comment: {
+			type: String,
+			required: false,
+		},
+	},
+	{
+		timestamps: true,
+	}
+);
+
+const CommentSchema = new mongoose.Schema(
+	{
+		user: {
+			ref: "UserAuth",
+			type: mongoose.Schema.Types.ObjectId,
+			required: true,
+		},
+		productId: {
+			ref: "Product",
+			type: mongoose.Schema.Types.ObjectId,
+			required: true,
+		},
+		comment: {
+			type: String,
+			required: true,
+		},
+	},
+	{ timestamps: true }
+);
+
 const ProductSchema = new mongoose.Schema({
 	name: {
 		type: String,
@@ -76,7 +124,7 @@ const ProductSchema = new mongoose.Schema({
 		required: true,
 		default: [],
 	},
-	isNew: {
+	isNewItem: {
 		type: Boolean,
 		required: false,
 		default: false,
@@ -133,55 +181,8 @@ const ProductSchema = new mongoose.Schema({
 	},
 });
 
-const ReviewSchema = new mongoose.Schema(
-	{
-		user: {
-			ref: "UserAuth",
-			type: mongoose.Schema.Types.ObjectId,
-			required: true,
-		},
-		productId: {
-			ref: "Product",
-			type: mongoose.Schema.Types.ObjectId,
-			required: true,
-		},
-		rating: {
-			type: Number,
-			required: true,
-			min: 1,
-			max: 5,
-		},
-		comment: {
-			type: String,
-			required: false,
-		},
-	},
-	{
-		timestamps: true,
-	}
-);
-
-const CommentSchema = new mongoose.Schema(
-	{
-		user: {
-			ref: "UserAuth",
-			type: mongoose.Schema.Types.ObjectId,
-			required: true,
-		},
-		productId: {
-			ref: "Product",
-			type: mongoose.Schema.Types.ObjectId,
-			required: true,
-		},
-		comment: {
-			type: String,
-			required: true,
-		},
-	},
-	{ timestamps: true }
-);
-
 const UserAuth =
 	mongoose.models.UserAuth || mongoose.model("UserAuth", userAuthSchema);
-
-export { UserAuth };
+const Product =
+	mongoose.models.Product || mongoose.model("Product", ProductSchema);
+export { UserAuth, Product };

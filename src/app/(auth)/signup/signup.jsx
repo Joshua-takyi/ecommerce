@@ -45,12 +45,23 @@ export default function SignUp() {
 			}
 		},
 		onSuccess: (data) => {
-			toast.success(data.message || "Registration successful!");
+			// Success toast
+			toast.success("🎉 Registration successful!", {
+				description: "You can now sign in with your credentials.",
+				action: {
+					label: "Sign In",
+					onClick: () => router.push("/signin"),
+				},
+			});
 			reset(); // Clear form
 			router.push("/signin"); // Redirect to login
 		},
 		onError: (error) => {
-			toast.error(error.message);
+			// Error toast
+			toast.error("🚨 Registration failed", {
+				description:
+					error.message || "Please check your details and try again.",
+			});
 		},
 		enabled: false,
 	});

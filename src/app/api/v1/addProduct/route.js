@@ -7,6 +7,7 @@ import { z } from "zod";
 // Define validation schema
 const productSchema = z.object({
 	name: z.string().min(3, "Name must be at least 3 characters"),
+	slug: z.string().min(3, "Slug must be at least 3 characters"),
 	price: z.number().min(0, "Price must be a positive number"),
 	description: z.string().min(10, "Description must be at least 10 characters"),
 	image: z.array(z.string()).min(1, "At least one image is required"),
@@ -39,6 +40,11 @@ const generateSku = (name, price, category) => {
 	return sku;
 };
 
+const generateSlug = (name) => {
+	const slug = name.toLowerCase().replace(/\s+/g, "-");
+	return slug;
+};
+
 export async function POST(req) {
 	try {
 		// Parse and validate request data
@@ -66,6 +72,7 @@ export async function POST(req) {
 			validationResult.data.price,
 			validationResult.data.category
 		);
+		const generatedSlug = generateSlug(validationResult.data.name);
 
 		// Create product
 		const item = await Product.create({
@@ -91,6 +98,7 @@ export async function POST(req) {
 			salesEndAt: validationResult.data.salesEndAt,
 			isOnSale: validationResult.data.isOnSale,
 			sku: generatedSku,
+			slug: generatedSlug,
 		});
 		logger.info("Product added successfully", { productId: item._id });
 

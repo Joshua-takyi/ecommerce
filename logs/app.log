@@ -2,3 +2,7 @@
 [31m2025-01-21 00:29:30 [ERROR]: Error adding product[39m
 [31m2025-01-21 00:30:02 [ERROR]: Error adding product[39m
 [31m2025-01-21 01:22:27 [ERROR]: Error fetching products: [tags].split is not a function[39m
+[31m2025-01-21 10:06:13 [ERROR]: Error deleting product: 678f6f52572a8d3e14c60ce6[39m
+[31m2025-01-21 10:07:35 [ERROR]: Error deleting product: 678f6f64572a8d3e14c60ce8[39m
+[31m2025-01-21 10:08:00 [ERROR]: Error deleting product: 678f6f64572a8d3e14c60ce8[39m
+[31m2025-01-21 10:28:47 [ERROR]: Error updating product: 678f7248572a8d3e14c60cf4[39m

@@ -49,6 +49,8 @@ export const buildQuery = (searchParams) => {
 	return query;
 };
 
-export const BuildSort = (sortBy, order) => {
-	return sortBy ? { [sortBy]: order === "desc" ? -1 : 1 } : { createdAt: -1 };
+export const BuildSort = (sortBy, sortOrder) => {
+	return sortBy
+		? { [sortBy]: sortOrder === "desc" ? -1 : 1 }
+		: { createdAt: -1 };
 };

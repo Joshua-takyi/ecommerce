@@ -3,44 +3,77 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { UserAuth } from "@/models/schema";
 import logger from "@/utils/logger";
-export async function POST(req) {
-	const { name, email, password } = await req.json();
-	try {
-		await connectDb();
-		if (!name || !email || !password) {
-			return NextResponse.json({ error: "Invalid request" }, { status: 400 });
-		}
-		// check if user already exist in the database
+import z from "zod";
 
-		const user = await UserAuth.findOne({ email });
-		if (user) {
+// Define validation schema
+const signUpSchema = z.object({
+	name: z.string().min(3).max(30),
+	email: z.string().email(),
+	password: z.string().min(8),
+});
+
+export async function POST(req) {
+	try {
+		// Parse and validate request body
+		const { name, email, password } = await req.json();
+		const validationResult = signUpSchema.safeParse({ name, email, password });
+
+		// Handle validation errors
+		if (!validationResult.success) {
+			const errors = validationResult.error.issues.map((issue) => ({
+				field: issue.path[0],
+				message: issue.message,
+			}));
+			logger.warn("Invalid sign-up request", { errors });
 			return NextResponse.json(
-				{ error: "User already exist" },
+				{ error: "Validation failed", errors },
 				{ status: 400 }
 			);
 		}
-		// hash password
 
+		// Connect to the database
+		await connectDb();
+
+		// Check if user already exists
+		const existingUser = await UserAuth.findOne({ email });
+		if (existingUser) {
+			logger.warn(`User already exists: ${email}`);
+			return NextResponse.json(
+				{ error: "User already exists" },
+				{ status: 400 }
+			);
+		}
+
+		// Hash the password
 		const hashedPassword = await bcrypt.hash(password, 10);
+
+		// Create the new user
 		const newUser = await UserAuth.create({
 			name,
 			email,
 			password: hashedPassword,
 			role: "user",
 		});
+
+		// Log successful user creation
+		logger.info(`User created successfully: ${newUser.email}`);
+
+		// Return success response
 		return NextResponse.json(
-			{ message: "User created successfully", user: newUser.id },
+			{
+				message: "User created successfully",
+				user: { id: newUser._id, email: newUser.email },
+			},
 			{ status: 201 }
 		);
 	} catch (error) {
-		logger.error("failed to create user");
+		// Log unexpected errors
+		logger.error("Failed to create user", { error: error.message });
+
+		// Return generic error response
 		return NextResponse.json(
-			{
-				error: error.message,
-			},
-			{
-				status: 500,
-			}
+			{ error: "An unexpected error occurred during sign-up" },
+			{ status: 500 }
 		);
 	}
 }

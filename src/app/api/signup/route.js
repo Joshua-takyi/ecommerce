@@ -12,20 +12,8 @@ const signUpSchema = z.object({
 	password: z.string().min(8),
 });
 
-// CORS headers
-const corsHeaders = {
-	"Access-Control-Allow-Origin": "https://ecommerce-mu-blush-89.vercel.app", // Replace with your frontend URL
-	"Access-Control-Allow-Methods": "POST, OPTIONS", // Allow POST and OPTIONS
-	"Access-Control-Allow-Headers": "Content-Type", // Allow Content-Type header
-};
-
 export async function POST(req) {
 	try {
-		// Handle preflight request (OPTIONS)
-		if (req.method === "OPTIONS") {
-			return NextResponse.json({}, { headers: corsHeaders });
-		}
-
 		// Parse and validate request body
 		const { name, email, password } = await req.json();
 		const validationResult = signUpSchema.safeParse({ name, email, password });
@@ -39,7 +27,7 @@ export async function POST(req) {
 			logger.warn("Invalid sign-up request", { errors });
 			return NextResponse.json(
 				{ error: "Validation failed", errors },
-				{ status: 400, headers: corsHeaders }
+				{ status: 400 }
 			);
 		}
 
@@ -52,7 +40,7 @@ export async function POST(req) {
 			logger.warn(`User already exists: ${email}`);
 			return NextResponse.json(
 				{ error: "User already exists" },
-				{ status: 400, headers: corsHeaders }
+				{ status: 400 }
 			);
 		}
 
@@ -76,7 +64,7 @@ export async function POST(req) {
 				message: "User created successfully",
 				user: { id: newUser._id, email: newUser.email },
 			},
-			{ status: 201, headers: corsHeaders }
+			{ status: 201 }
 		);
 	} catch (error) {
 		// Log unexpected errors
@@ -85,7 +73,7 @@ export async function POST(req) {
 		// Return generic error response
 		return NextResponse.json(
 			{ error: "An unexpected error occurred during sign-up" },
-			{ status: 500, headers: corsHeaders }
+			{ status: 500 }
 		);
 	}
 }

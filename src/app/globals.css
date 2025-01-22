@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 input {
-	@apply rounded-md text-base md:px-4 px-2 py-2 border border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+	@apply rounded-md text-base md:px-4 px-2 py-2 border border-slate-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent;
 }
 
 .normal-button {
@@ -16,4 +16,19 @@ input {
 
 .normal-button:disabled {
 	@apply bg-slate-400;
+}
+
+@layer base {
+	:root {
+		--radius: 0.5rem;
+	}
+}
+
+.select-input {
+	@apply rounded-md text-base md:px-4 px-2 py-2 border border-slate-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent;
+}
+
+.imgBg {
+	mix-blend-mode: multiply;
+	background-color: transparent;
 }

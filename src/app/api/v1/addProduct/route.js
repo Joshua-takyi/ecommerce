@@ -1,13 +1,13 @@
 import { Product } from "@/models/schema";
-import { connectDb } from "@/utils/connect";
 import logger from "@/utils/logger";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import slugify from "slugify";
+import { connectDb } from "@/utils/connect";
 
 // Define validation schema
 const productSchema = z.object({
 	name: z.string().min(3, "Name must be at least 3 characters"),
-	slug: z.string().min(3, "Slug must be at least 3 characters"),
 	price: z.number().min(0, "Price must be a positive number"),
 	description: z.string().min(10, "Description must be at least 10 characters"),
 	image: z.array(z.string()).min(1, "At least one image is required"),
@@ -25,24 +25,22 @@ const productSchema = z.object({
 	comments: z.array(z.string()).optional().default([]),
 	discountPercentage: z.number().min(0).max(100).optional().default(0),
 	rating: z.number().min(0).max(5).optional().default(0),
-	salesStartAt: z.date().nullable().optional(),
-	salesEndAt: z.date().nullable().optional(),
+	salesStartAt: z.coerce.date().nullable().optional(),
+	salesEndAt: z.coerce.date().nullable().optional(),
 	isOnSale: z.boolean().optional().default(false),
-	sku: z.string().min(1, "SKU is required").optional(),
 });
 
 // generate an sku
 const generateSku = (name, price, category) => {
 	const namePrefix = name.slice(0, 3).toUpperCase();
-	const pricePrefix = price.toFixed(2);
+	const pricePrefix = Math.floor(price).toString().padStart(4, "0");
 	const categoryPrefix = category[0].slice(0, 3).toUpperCase();
 	const sku = `${namePrefix}-${pricePrefix}-${categoryPrefix}`;
 	return sku;
 };
 
 const generateSlug = (name) => {
-	const slug = name.toLowerCase().replace(/\s+/g, "-");
-	return slug;
+	return slugify(name, { lower: true, strict: true });
 };
 
 export async function POST(req) {
@@ -53,10 +51,12 @@ export async function POST(req) {
 
 		// Handle validation errors
 		if (!validationResult.success) {
-			const errors = validationResult.error.issues.map((issue) => ({
-				field: issue.path.join("."),
-				message: issue.message,
-			}));
+			const errors = validationResult.error.issues.reduce((acc, issue) => {
+				const field = issue.path.join(".");
+				acc[field] = acc[field] || [];
+				acc[field].push(issue.message);
+				return acc;
+			}, {});
 			return NextResponse.json(
 				{ error: "Validation failed", errors },
 				{ status: 400 }
@@ -64,9 +64,19 @@ export async function POST(req) {
 		}
 
 		// Connect to the database
-		await connectDb();
+		try {
+			await connectDb();
+		} catch (error) {
+			logger.error("Failed to connect to the database", {
+				error: error.message,
+			});
+			return NextResponse.json(
+				{ error: "Failed to connect to the database" },
+				{ status: 500 }
+			);
+		}
 
-		// generate sku
+		// generate sku and slug
 		const generatedSku = generateSku(
 			validationResult.data.name,
 			validationResult.data.price,
@@ -76,31 +86,21 @@ export async function POST(req) {
 
 		// Create product
 		const item = await Product.create({
-			name: validationResult.data.name,
-			price: validationResult.data.price,
-			description: validationResult.data.description,
-			image: validationResult.data.image,
-			category: validationResult.data.category,
-			stock: validationResult.data.stock,
-			available: validationResult.data.available,
-			tags: validationResult.data.tags,
-			isNewItem: validationResult.data.isNewItem,
-			details: validationResult.data.details,
-			features: validationResult.data.features,
-			materials: validationResult.data.materials,
-			colors: validationResult.data.colors,
-			model: validationResult.data.model,
-			reviews: validationResult.data.reviews,
-			comments: validationResult.data.comments,
-			discountPercentage: validationResult.data.discountPercentage,
-			rating: validationResult.data.rating,
-			salesStartAt: validationResult.data.salesStartAt,
-			salesEndAt: validationResult.data.salesEndAt,
-			isOnSale: validationResult.data.isOnSale,
+			...validationResult.data,
 			sku: generatedSku,
 			slug: generatedSlug,
 		});
-		logger.info("Product added successfully", { productId: item._id });
+
+		if (!item) {
+			logger.error("Failed to create product", {
+				error: "Failed to create product",
+			});
+			throw new Error("Failed to create product");
+		}
+		logger.info("Product added successfully", {
+			productId: item._id,
+			name: item.name,
+		});
 
 		// Return success response
 		return NextResponse.json(
@@ -108,7 +108,10 @@ export async function POST(req) {
 			{ status: 201 }
 		);
 	} catch (error) {
-		logger.error("Error adding product", { error: error.message });
+		logger.error("Error adding product", {
+			error: error.message,
+			stack: error.stack,
+		});
 		return NextResponse.json(
 			{ error: "Internal server error", details: error.message },
 			{ status: 500 }

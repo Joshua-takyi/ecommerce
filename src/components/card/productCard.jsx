@@ -12,15 +12,15 @@ const formatPrice = (price, currency = "GHS") => {
 	}).format(price);
 };
 
-export const ProductCard = ({
+export default function ProductCard({
 	name,
 	color,
 	price,
 	image,
 	discount,
-	id,
+	slug,
 	images,
-}) => {
+}) {
 	const [isHovered, setIsHovered] = useState(false);
 
 	// Calculate discounted price
@@ -35,8 +35,8 @@ export const ProductCard = ({
 
 	return (
 		<Link
-			href={`/product/${id}`}
-			className="group relative w-full bg-transparent"
+			href={`/product/${slug}`}
+			className="group relative w-full bg-transparent border p-2 "
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
 		>
@@ -48,7 +48,7 @@ export const ProductCard = ({
 					alt={`${name} - ${color}`}
 					fill
 					sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-					className={`object-cover object-center transition-opacity duration-300 ease-in-out ${
+					className={`object-cover object-center transition-opacity duration-300 ease-in-out  imgBg ${
 						isHovered ? "opacity-0" : "opacity-100"
 					}`}
 					priority={false}
@@ -60,7 +60,7 @@ export const ProductCard = ({
 						alt={`${name} - ${color} - Alternate`}
 						fill
 						sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-						className={`object-cover object-center transition-opacity duration-300 ease-in-out ${
+						className={`object-cover object-center transition-opacity duration-300 ease-in-out imgBg ${
 							isHovered ? "opacity-100" : "opacity-0"
 						}`}
 						priority={false}
@@ -101,7 +101,7 @@ export const ProductCard = ({
 			</div>
 		</Link>
 	);
-};
+}
 
 // Prop types validation
 ProductCard.propTypes = {
@@ -110,6 +110,6 @@ ProductCard.propTypes = {
 	price: PropTypes.number.isRequired,
 	image: PropTypes.string.isRequired,
 	discount: PropTypes.number.isRequired,
-	id: PropTypes.string.isRequired,
+	slug: PropTypes.string.isRequired,
 	images: PropTypes.arrayOf(PropTypes.string).isRequired,
 };

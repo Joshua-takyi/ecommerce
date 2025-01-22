@@ -1,13 +1,18 @@
 import { Product } from "@/models/schema";
 import { buildQuery, BuildSort } from "@/utils/buildQuery";
-import { connectDb } from "@/utils/connect";
 import logger from "@/utils/logger";
 import { NextResponse } from "next/server";
-
+import mongoose from "mongoose";
 export async function GET(req) {
 	try {
 		// Connect to the database
-		await connectDb();
+		if (mongoose.connection.readyState !== 1) {
+			logger.error("failed to connect to database");
+			return NextResponse.json(
+				{ error: "failed to connect to database" },
+				{ status: 500 }
+			);
+		}
 
 		// Parse query parameters
 		const searchParams = req.nextUrl.searchParams;
@@ -21,13 +26,11 @@ export async function GET(req) {
 		const query = buildQuery(searchParams);
 		const sort = BuildSort(sortBy, order);
 
-		// Fetch products with pagination
-		const products = await Product.find(query)
-			.sort(sort)
-			.skip(skip)
-			.limit(limit);
-		// Get total count for pagination metadata
-		const total = await Product.countDocuments(query);
+		// Fetch products and total count in parallel
+		const [products, total] = await Promise.all([
+			Product.find(query).sort(sort).skip(skip).limit(limit).lean(),
+			Product.countDocuments(query),
+		]);
 
 		// Return response with pagination metadata
 		return NextResponse.json({

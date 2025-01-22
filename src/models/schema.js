@@ -82,7 +82,7 @@ const ProductSchema = new mongoose.Schema({
 	},
 	slug: {
 		type: String,
-		required: true,
+		required: false,
 		unique: true,
 	},
 	description: {
@@ -104,7 +104,7 @@ const ProductSchema = new mongoose.Schema({
 	},
 	sku: {
 		type: String,
-		required: true,
+		required: false,
 	},
 	stock: {
 		type: Number,
@@ -112,11 +112,11 @@ const ProductSchema = new mongoose.Schema({
 	},
 	rating: {
 		type: Number,
-		required: true,
+		required: false,
 	},
 	isOnSale: {
 		type: Boolean,
-		required: true,
+		required: false,
 		default: false,
 	},
 	available: {
@@ -161,7 +161,7 @@ const ProductSchema = new mongoose.Schema({
 	},
 	reviews: {
 		type: [ReviewSchema],
-		required: true,
+		required: false,
 		default: [],
 	},
 	comments: {
@@ -182,9 +182,13 @@ const ProductSchema = new mongoose.Schema({
 	salesEndAt: {
 		type: Date,
 		required: false,
-		default: null,
+			default: null,
+		},
 	},
-});
+	{
+		timestamps: true,
+	}
+);
 
 const UserAuth =
 	mongoose.models.UserAuth || mongoose.model("UserAuth", userAuthSchema);

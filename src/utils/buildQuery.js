@@ -1,56 +1,53 @@
 export const buildQuery = (searchParams) => {
 	const query = {};
-	const name = searchParams.get("name");
-	const category = searchParams.get("category");
-	const price = searchParams.get("price");
-	const rating = searchParams.get("rating");
-	const isOnSale = searchParams.get("isOnSale");
-	const available = searchParams.get("available");
-	const tags = searchParams.get("tags") || "";
-	const isNewItem = searchParams.get("isNewItem");
-	const model = searchParams.get("model");
-	const discountPercentage = searchParams.get("discountPercentage");
-	const salesStartAt = searchParams.get("salesStartAt");
-	const salesEndAt = searchParams.get("salesEndAt");
-	const search = searchParams.get("search");
-	if (name) query.name = name;
-	if (category) query.category = category;
-	if (price) query.price = parseFloat(price);
-	if (rating) query.rating = parseFloat(rating);
-	if (isOnSale) query.isOnSale = isOnSale;
-	if (available) query.available = available;
-	if (isNewItem) query.isNewItem = isNewItem;
-	if (discountPercentage)
-		query.discountPercentage = parseFloat(discountPercentage);
-	if (salesStartAt) query.salesStartAt = new Date(salesStartAt);
-	if (salesEndAt) query.salesEndAt = new Date(salesEndAt);
 
-	if (tags) {
-		const tagArray = tags.split(",").map((tag) => tag.trim());
-		query.tags = {
-			$in: tagArray.map((tag) => new RegExp(tag, "i")), // Case-insensitive matching
-		};
-	}
+	// Helper function to parse and add regex conditions
+	const addRegexCondition = (field, value) => {
+		if (value) {
+			query[field] = { $regex: value, $options: "i" }; // Case-insensitive regex
+		}
+	};
+
+	// Helper function to parse and add array conditions
+	const addArrayCondition = (field, value) => {
+		if (value) {
+			const array = value.split(",").map((item) => item.trim());
+			query[field] = { $in: array.map((item) => new RegExp(item, "i")) };
+		}
+	};
+
+	// Add conditions based on search parameters
+	addRegexCondition("name", searchParams.get("name"));
+	addRegexCondition("search", searchParams.get("search"));
+
+	if (searchParams.get("price")) query.price = parseFloat(searchParams.get("price"));
+	if (searchParams.get("rating")) query.rating = parseFloat(searchParams.get("rating"));
+	if (searchParams.get("isOnSale")) query.isOnSale = searchParams.get("isOnSale") === "true";
+	if (searchParams.get("available")) query.available = searchParams.get("available") === "true";
+	if (searchParams.get("isNewItem")) query.isNewItem = searchParams.get("isNewItem") === "true";
+	if (searchParams.get("discountPercentage")) query.discountPercentage = parseFloat(searchParams.get("discountPercentage"));
+	if (searchParams.get("salesStartAt")) query.salesStartAt = new Date(searchParams.get("salesStartAt"));
+	if (searchParams.get("salesEndAt")) query.salesEndAt = new Date(searchParams.get("salesEndAt"));
+
+	addArrayCondition("category", searchParams.get("category"));
+	addArrayCondition("tags", searchParams.get("tags"));
+
+	// Handle model parameter
+	const model = searchParams.get("model");
 	if (model) {
-		const modelArray = model.split(",").map((tag) => tag.trim());
-		query.model = {
-			$in: modelArray.map((tag) => new RegExp(tag, "i")), // Case-insensitive matching
-		};
+		try {
+			const parsedModel = JSON.parse(model);
+			if (Array.isArray(parsedModel) && parsedModel.length > 0) {
+				query.model = { $in: parsedModel.map((m) => new RegExp(m, "i")) };
+			}
+		} catch (e) {
+			console.error("Error parsing model:", e);
+		}
 	}
-	if (search) {
-		query.for = [
-			{ name: { $regex: search, $options: "i" } },
-			{ description: { $regex: search, $options: "i" } },
-			{ category: { $regex: search, $options: "i" } },
-			{ tags: { $regex: search, $options: "i" } },
-			{ model: { $regex: search, $options: "i" } },
-		];
-	}
+
 	return query;
 };
 
 export const BuildSort = (sortBy, sortOrder) => {
-	return sortBy
-		? { [sortBy]: sortOrder === "desc" ? -1 : 1 }
-		: { createdAt: -1 };
+	return sortBy ? { [sortBy]: sortOrder === "desc" ? -1 : 1 } : { createdAt: -1 };
 };

@@ -1,10 +1,10 @@
 import { Product } from "@/models/schema";
-import { connectDb } from "@/utils/connect";
 import logger from "@/utils/logger";
 import { NextResponse } from "next/server";
 import NodeCache from "node-cache";
-
+import mongoose from "mongoose";
 // Initialize cache with a TTL of 60 seconds
+
 const cache = new NodeCache({ stdTTL: 60 });
 
 export async function GET(req, { params }) {
@@ -19,7 +19,13 @@ export async function GET(req, { params }) {
 		}
 
 		// Connect to the database
-		await connectDb();
+		if (mongoose.connection.readyState !== 1) {
+			logger.error("failed to connect to database");
+			return NextResponse.json(
+				{ error: "failed to connect to database" },
+				{ status: 500 }
+			);
+		}
 
 		// Fetch product from the database
 		const product = await Product.findOne({ slug }).lean(); // Convert Mongoose document to plain JavaScript object
@@ -46,4 +52,3 @@ export async function GET(req, { params }) {
 		);
 	}
 }
-

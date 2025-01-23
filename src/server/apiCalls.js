@@ -82,7 +82,7 @@ export async function GetByCategory({
 	}
 }
 
-export async function GetProduct(slug) {
+export async function GetProduct({ slug }) {
 	try {
 		const res = await axios.get(`${API_URL}/v1/getData/${slug}`);
 		if (res.status !== 200) {

@@ -1,79 +1,99 @@
 "use client";
-import { Wrapper } from "@/components/wrapper";
 import { GetProduct } from "@/server/apiCalls";
-import PropTypes from "prop-types";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import { ProductCardSkeleton } from "@/components/skeleton";
+import LoadingPage from "../loading";
 import ImageCarousel from "@/components/carousel/productCarousel";
-import ColorSelect from "@/components/color";
+import { Wrapper } from "@/components/wrapper";
+import TabComponent from "@/components/tabs/tab";
+import { useState } from "react";
+import SelectPhoneModel from "@/components/productAccordion/accordion";
 
-export default function Product({ slug }) {
-	const [color, setColor] = useState("")
-	const [model, setModel = useState("")
-		// Fetch product data using useQuery
+export default function ProductPage({ slug }) {
 	const { data, isLoading, error } = useQuery({
-		queryKey: ["product", slug],
+		queryKey: ["products", slug],
 		queryFn: async () => {
 			try {
-				const data = await GetProduct(slug);
-				return data.data;
+				const res = await GetProduct({ slug });
+				return res.data;
 			} catch (error) {
-				console.error("Error fetching product:", error);
-				throw new Error(error.message || "Failed to fetch product data");
+				throw new Error(error.message || `Failed to get data for ${slug}`);
 			}
 		},
 	});
 
-	// Memoize product data to avoid unnecessary re-renders
-	const product = useMemo(() => data, [data]);
+	const [selectedColor, setSelectedColor] = useState("");
+	const [selectedModel, setSelectedModel] = useState("");
 
-	// Handle loading state
 	if (isLoading) {
-		return <ProductCardSkeleton />; // Use a skeleton loader
+		return <LoadingPage />;
 	}
 
-	// Handle error state
 	if (error) {
-		return (
-			<div className="flex justify-center items-center h-screen">
-				<p className="text-red-500">Error: {error.message}</p>
-			</div>
-		);
+		return <div>Error: {error.message}</div>;
 	}
 
-	// Handle no data state
-	if (!product) {
-		return (
-			<div className="flex justify-center items-center h-screen">
-				<p>No data found</p>
-			</div>
-		);
+	if (!data) {
+		return <div>Product data is not available</div>;
 	}
+
+	const product = data;
 
 	return (
-		<main className="min-h-screen p-3 md:p-2 text-bodySm">
+		<main>
 			<Wrapper>
-				<div className="grid grid-cols-1 md:grid-col-2">
-					<div className="col-span-1">
+				<div className="grid md:grid-cols-6 gap-4 p-3">
+					<div className="md:col-span-3 col-span-1 border-r-2">
 						<ImageCarousel images={product.image} />
 					</div>
-					<div>
-						<div className="flex flex-col space-y-4 justify-center">
-							<h1 className="text-bodyLg ">{product.name}</h1>
-							{/* details for the color and model */}
-							<div className="flex flex-col space-y-2">
-								<ColorSelect />
+					<div className="md:col-span-3 col-span-1">
+						<div className="flex flex-col gap-4">
+							<h1 className="text-bodyMd font-semibold">{product.name}</h1>
+							<div>
+								<label className="text-sm font-medium text-gray-700">
+									Color
+								</label>
+								<select
+									value={selectedColor}
+									onChange={(e) => setSelectedColor(e.target.value)}
+									className="w-full rounded-none focus:ring-0 outline-none"
+								>
+									{product.colors.map((color) => (
+										<option key={color} value={color}>
+											{color}
+										</option>
+									))}
+								</select>
 							</div>
+							<div>
+								<SelectPhoneModel
+									itemModel={product.model}
+									value={selectedModel}
+									onChange={setSelectedModel}
+									title="Model"
+								/>
+							</div>
+							<button className="bg-blue-500 text-white py-2 px-4 rounded">
+								Add to Cart
+							</button>
 						</div>
 					</div>
+				</div>
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3">
+					<TabComponent
+						data={{
+							description: product.description,
+							materials: product.materials,
+							features: product.features,
+							details: product.details,
+						}}
+					/>
 				</div>
 			</Wrapper>
 		</main>
 	);
 }
 
-// Correct PropTypes definition
-Product.propTypes = {
-	slug: PropTypes.string.isRequired,
+// Optional: Add default props
+ProductPage.defaultProps = {
+	slug: "",
 };

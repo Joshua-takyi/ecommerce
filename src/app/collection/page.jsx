@@ -1,5 +1,9 @@
-import CollectionPage from "./collectionpage";
+import ColPage from "./collectionpage";
 
 export default function ProductCollectionPage() {
-	return <CollectionPage />;
+	return (
+		<div>
+			<ColPage />
+		</div>
+	);
 }

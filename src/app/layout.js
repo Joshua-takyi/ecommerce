@@ -83,7 +83,7 @@ export default function RootLayout({ children }) {
 				<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 			</head>
 			<body
-				className={`${spaceMono.variable} ${geistSans.className} antialiased`}
+				className={`${spaceMono.className} ${geistSans.variable} antialiased`}
 			>
 				{/* Toast notifications */}
 				<Toaster richColors position="top-right" />

@@ -23,7 +23,7 @@ const Carousel = ({
 	const updateSlidesPerView = useCallback(() => {
 		const width = window.innerWidth;
 		if (width < 480) {
-			setSlidesPerView(1); // Small mobile
+			setSlidesPerView(2); // Small mobile
 		} else if (width < 640) {
 			setSlidesPerView(2); // Mobile
 		} else if (width < 768) {

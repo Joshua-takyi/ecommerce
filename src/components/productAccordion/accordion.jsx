@@ -8,12 +8,12 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 
-export const SelectPhoneModel = ({
+export default function SelectPhoneModel({
 	itemModel = [],
 	value,
 	onChange,
 	title,
-}) => {
+}) {
 	// Sort models directly
 	const sortedModels = React.useMemo(() => {
 		return itemModel.sort((a, b) => {
@@ -45,6 +45,4 @@ export const SelectPhoneModel = ({
 			</Select>
 		</div>
 	);
-};
-
-export default SelectPhoneModel;
+}

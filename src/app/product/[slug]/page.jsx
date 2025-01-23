@@ -1,14 +1,10 @@
-import Product from "../productPage";
-import PropTypes from "prop-types";
-export default async function ProductDetailsPage({ params }) {
+import ProductPage from "../productPage";
+
+export default async function Product({ params }) {
 	const { slug } = await params;
 	return (
 		<div>
-			<Product slug={slug} />
+			<ProductPage slug={slug} />
 		</div>
 	);
 }
-
-ProductDetailsPage.propTypes = {
-	params: PropTypes.object.isRequired,
-};

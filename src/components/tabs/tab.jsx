@@ -16,7 +16,7 @@ const TabComponent = ({ data }) => {
 	});
 
 	return (
-		<div className="flex flex-col md:gap-10 gap-4 max-w-5xl w-full">
+		<div className="flex flex-col md:gap-10 gap-4 max-w-5xl w-full text-bodyXs">
 			<div className="text-normalText leading-5">
 				{/* Tab Headers */}
 				<div className="relative flex border-b border-gray-300">

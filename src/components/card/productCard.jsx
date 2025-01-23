@@ -1,115 +1,71 @@
-"use client";
+import React from "react";
 import Image from "next/image";
-import Link from "next/link";
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { redirect } from "next/navigation";
 
-// Format price as currency
-const formatPrice = (price, currency = "GHS") => {
-	return new Intl.NumberFormat("en-GH", {
-		style: "currency",
-		currency,
-	}).format(price);
+const formatCurrency = (price) =>
+	new Intl.NumberFormat("en-GH", { style: "currency", currency: "GHc" }).format(
+		price
+	);
+
+const formattedName = (name) =>
+	name?.length > 20 ? name.trim().slice(0, 20) + "..." : name;
+
+const handleClick = (e, slug) => {
+	e.preventDefault();
+	redirect(`/product/${slug}`);
 };
 
-export default function ProductCard({
-	name,
-	color,
-	price,
-	image,
-	discount,
-	slug,
-	images,
-}) {
-	const [isHovered, setIsHovered] = useState(false);
-
-	// Calculate discounted price
-	const discountedPrice = price - (price * discount) / 100;
-
-	// Format prices
-	const formattedPrice = formatPrice(price);
-	const formattedDiscountedPrice = formatPrice(discountedPrice);
-
-	// Truncate long product names
-	const formattedName = name.length > 25 ? `${name.substring(0, 25)}...` : name;
+export default function ProductCard({ slug, image, name, price, discount }) {
+	const { discountPrice } = discount
+		? { discountPrice: price - (price * discount) / 100 }
+		: { discountPrice: price };
 
 	return (
-		<Link
-			href={`/product/${slug}`}
-			className="group relative w-full bg-transparent border p-2 "
-			onMouseEnter={() => setIsHovered(true)}
-			onMouseLeave={() => setIsHovered(false)}
+		<div
+			className="relative w-full aspect-[3/4] group cursor-pointer"
+			onClick={(e) => handleClick(e, slug)}
 		>
-			{/* Image Container */}
-			<div className="relative aspect-square w-full overflow-hidden bg-transparent rounded-lg">
-				{/* Main Image */}
+			<div className="relative w-full h-[80%]">
 				<Image
-					src={image}
-					alt={`${name} - ${color}`}
 					fill
+					src={image}
+					alt={name}
+					loading="lazy"
+					className="object-cover group-hover:scale-105 transition-transform duration-300"
 					sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-					className={`object-cover object-center transition-opacity duration-300 ease-in-out  imgBg ${
-						isHovered ? "opacity-0" : "opacity-100"
-					}`}
-					priority={false}
 				/>
-				{/* Secondary Image (image[1]) */}
-				{images && images.length > 1 && (
-					<Image
-						src={images[1]}
-						alt={`${name} - ${color} - Alternate`}
-						fill
-						sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-						className={`object-cover object-center transition-opacity duration-300 ease-in-out imgBg ${
-							isHovered ? "opacity-100" : "opacity-0"
-						}`}
-						priority={false}
-					/>
+				{discount && (
+					<div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 text-xs">
+						{discount}% OFF
+					</div>
 				)}
 			</div>
-
-			{/* Product Info */}
-			<div className="mt-4 space-y-1">
-				{/* Product Name */}
-				<h3 className="text-sm font-medium text-gray-900 line-clamp-2">
-					{formattedName}
-				</h3>
-
-				{/* Product Color */}
-				<p className="text-sm text-gray-500 capitalize">{color}</p>
-
-				{/* Price Section */}
+			<div className="mt-2 flex flex-col  gap-2">
+				<p className="text-sm">{formattedName(name)}</p>
 				<div className="flex items-center gap-2">
-					{discount > 0 ? (
+					{discount ? (
 						<>
-							{/* Discounted Price */}
-							<p className="text-sm font-medium text-gray-900">
-								{formattedDiscountedPrice}
+							<p className="text-sm line-through text-gray-400">
+								{formatCurrency(price)}
 							</p>
-							{/* Original Price with Line-Through */}
-							<p className="text-sm text-gray-400 line-through">
-								{formattedPrice}
+							<p className="text-sm font-semibold">
+								{formatCurrency(discountPrice)}
 							</p>
 						</>
 					) : (
-						// Original Price (No Discount)
-						<p className="text-sm font-medium text-gray-900">
-							{formattedPrice}
-						</p>
+						<p className="text-sm font-semibold">{formatCurrency(price)}</p>
 					)}
 				</div>
 			</div>
-		</Link>
+		</div>
 	);
 }
 
-// Prop types validation
 ProductCard.propTypes = {
+	slug: PropTypes.string.isRequired,
 	name: PropTypes.string.isRequired,
-	color: PropTypes.string.isRequired,
 	price: PropTypes.number.isRequired,
 	image: PropTypes.string.isRequired,
-	discount: PropTypes.number.isRequired,
-	slug: PropTypes.string.isRequired,
-	images: PropTypes.arrayOf(PropTypes.string).isRequired,
+	discount: PropTypes.number,
 };

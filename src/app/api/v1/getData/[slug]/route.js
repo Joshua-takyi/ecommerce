@@ -40,9 +40,7 @@ export async function GET(req, { params }) {
 
 		// Cache the product
 		cache.set(slug, product);
-		logger.info(`Product fetched from database and cached: ${slug}`);
 
-		// Return the product
 		return NextResponse.json({ data: product });
 	} catch (error) {
 		logger.error(`Error fetching product: ${slug}`, { error: error.message });

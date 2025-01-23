@@ -1,16 +1,15 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChevronRight, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { filterData } from "@/database/db";
-
-export default function ColSideBar({
-	category = "Phone Cases",
-	onFilterChange,
-}) {
+export const ColSideBar = ({ category = "Phone Cases", onFilterChange }) => {
 	const [openCategory, setOpenCategory] = useState(null);
 	const [selectedModels, setSelectedModels] = useState([]);
+	const [sidebarStyle, setSidebarStyle] = useState({});
 	const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+	const sidebarRef = useRef(null);
 	const searchParams = useSearchParams();
 
 	const normalizeCategory = (category) => {
@@ -18,6 +17,54 @@ export default function ColSideBar({
 	};
 
 	const currentCategories = filterData[normalizeCategory(category)] || {};
+
+	useEffect(() => {
+		const handleScroll = () => {
+			if (!sidebarRef.current || window.innerWidth < 768) return;
+
+			const sidebar = sidebarRef.current;
+			const sidebarRect = sidebar.getBoundingClientRect();
+			const mainContent = document.querySelector(".grid"); // Grid of products
+
+			if (!mainContent) return;
+
+			const mainContentRect = mainContent.getBoundingClientRect();
+			const mainContentBottom =
+				mainContent.offsetTop + mainContent.offsetHeight;
+			const scrollY = window.scrollY;
+			const windowHeight = window.innerHeight;
+
+			// Get the parent container's top offset
+			const parentTop = sidebar.parentElement.getBoundingClientRect().top;
+
+			if (parentTop > 0) {
+				// Reset position when scrolled to top
+				setSidebarStyle({
+					position: "relative",
+					top: 0,
+				});
+			} else if (scrollY + windowHeight >= mainContentBottom) {
+				// Stop at bottom of content
+				setSidebarStyle({
+					position: "absolute",
+					top: mainContentBottom - sidebarRect.height,
+				});
+			} else {
+				// Stick to top
+				setSidebarStyle({
+					position: "fixed",
+					top: "0px",
+					width: sidebarRef.current.offsetWidth + "px",
+				});
+			}
+		};
+
+		window.addEventListener("scroll", handleScroll);
+		// Initial position check
+		handleScroll();
+
+		return () => window.removeEventListener("scroll", handleScroll);
+	}, []);
 
 	useEffect(() => {
 		const model = searchParams.get("model");
@@ -71,47 +118,31 @@ export default function ColSideBar({
 		onFilterChange(newSelectedModels);
 	};
 
+	const handleCloseMobile = () => {
+		setIsMobileOpen(false);
+		document.body.style.overflow = "auto";
+	};
+
 	const getFilterTitle = () => {
 		switch (category.toLowerCase()) {
 			case "phone-cases":
 			case "cases":
-			case "phone case":
-			case "case":
 				return "Phone Models";
-
 			case "airpod-cases":
-			case "airpod":
 			case "airpods":
-			case "airpods-case":
 				return "AirPods Models";
-
-			case "straps":
 			case "watch-straps":
-			case "watch strap":
-			case "watch straps":
-			case "iwatch-straps":
-			case "iwatch strap":
-				return "Watch Straps";
-
+				return "watch straps";
 			case "chargers":
 			case "charger":
-			case "charging-cables":
-			case "charging cable":
-			case "usb-chargers":
-			case "usb charger":
 				return "Charger Models";
-
 			case "iwatch-protectors":
-			case "iwatch protector":
-			case "apple-watch-protectors":
-			case "apple watch protector":
 				return "iWatch Protectors";
-
 			case "watch protector":
 			case "watch-protector":
-			case "screen protectors":
-			case "screen protector":
 				return "Watch Protectors";
+			default:
+				return "Models";
 		}
 	};
 
@@ -132,28 +163,20 @@ export default function ColSideBar({
 			{isMobileOpen && (
 				<div
 					className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-					onClick={() => setIsMobileOpen(false)}
+					onClick={handleCloseMobile}
 				/>
 			)}
 
-			<aside
-				className={`
-					md:block bg-white z-50
-					w-[280px] md:w-full max-w-xs
-					transition-transform duration-300 ease-in-out
-					${
-						isMobileOpen
-							? "fixed inset-y-0 right-0 translate-x-0"
-							: "fixed inset-y-0 right-0 translate-x-full md:relative md:translate-x-0"
-					}
-				`}
-			>
-				<div className="flex flex-col h-full">
+			<aside>
+				<div
+					className="flex flex-col h-full w-64 border-r border-gray-100"
+					ref={sidebarRef}
+				>
 					{/* Mobile Header */}
 					<div className="flex items-center justify-between p-4 md:hidden border-b border-gray-100">
 						<h2 className="text-lg font-medium">Filters</h2>
 						<button
-							onClick={() => setIsMobileOpen(false)}
+							onClick={handleCloseMobile}
 							className="p-2 hover:bg-gray-100 rounded-full"
 						>
 							<X className="w-5 h-5" />
@@ -237,7 +260,7 @@ export default function ColSideBar({
 					{/* Mobile Apply Button */}
 					<div className="p-4 border-t border-gray-100 md:hidden">
 						<button
-							onClick={() => setIsMobileOpen(false)}
+							onClick={handleCloseMobile}
 							className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
 						>
 							Apply Filters
@@ -247,4 +270,4 @@ export default function ColSideBar({
 			</aside>
 		</>
 	);
-}
+};

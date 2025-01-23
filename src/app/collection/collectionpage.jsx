@@ -3,6 +3,7 @@ import ProductCard from "@/components/card/productCard";
 import { GetByCategory } from "@/server/apiCalls";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
+import LoadingPage from "../loading";
 
 export default function ColPage() {
 	const searchparams = useSearchParams();
@@ -39,13 +40,18 @@ export default function ColPage() {
 		},
 	});
 
-	if (isLoading) return <div>Loading...</div>;
+	if (isLoading)
+		return (
+			<div>
+				<LoadingPage />
+			</div>
+		);
 	if (error) return <div>Error: {error.message}</div>;
 
 	if (!data || data.length === 0) return <div>No data found</div>;
 	return (
 		<main className="p-3">
-			<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+			<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 				{data.map((product) => (
 					<ProductCard
 						key={product._id}

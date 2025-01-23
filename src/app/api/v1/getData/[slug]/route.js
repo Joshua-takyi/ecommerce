@@ -3,6 +3,7 @@ import logger from "@/utils/logger";
 import { NextResponse } from "next/server";
 import NodeCache from "node-cache";
 import mongoose from "mongoose";
+import { connectDb } from "@/utils/connect";
 // Initialize cache with a TTL of 60 seconds
 
 const cache = new NodeCache({ stdTTL: 60 });
@@ -20,11 +21,7 @@ export async function GET(req, { params }) {
 
 		// Connect to the database
 		if (mongoose.connection.readyState !== 1) {
-			logger.error("failed to connect to database");
-			return NextResponse.json(
-				{ error: "failed to connect to database" },
-				{ status: 500 }
-			);
+			await connectDb();
 		}
 
 		// Fetch product from the database

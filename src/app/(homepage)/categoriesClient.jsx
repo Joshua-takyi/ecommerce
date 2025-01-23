@@ -16,13 +16,13 @@ export default function CategoriesClient() {
 			<Wrapper>
 				<div className="flex flex-col space-y-8">
 					{/* Header Section */}
-					<div className="flex flex-col space-y-4">
-						<h2 className="text-h3 font-semibold text-gray-900">
+					<div className="text-center mb-8">
+						<h2 className="md:text-3xl text-bodyMd font-bold text-gray-800 mb-4">
 							Shop by Category
 						</h2>
-						<p className="text-bodySm text-gray-600 max-w-2xl">
-							Explore our curated selection of categories, each offering unique
-							premium products.
+						<p className="md:text-lg text-bodySm text-gray-600 max-w-2xl mx-auto">
+							Explore our curated selection of premium categories, each offering
+							unique and carefully selected products.
 						</p>
 					</div>
 

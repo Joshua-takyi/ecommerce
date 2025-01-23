@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { ChevronRight, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { filterData } from "@/database/db";
+
 export const ColSideBar = ({ category = "Phone Cases", onFilterChange }) => {
 	const [openCategory, setOpenCategory] = useState(null);
 	const [selectedModels, setSelectedModels] = useState([]);
@@ -132,7 +133,7 @@ export const ColSideBar = ({ category = "Phone Cases", onFilterChange }) => {
 			case "airpods":
 				return "AirPods Models";
 			case "watch-straps":
-				return "watch straps";
+				return "Watch Straps";
 			case "chargers":
 			case "charger":
 				return "Charger Models";
@@ -151,7 +152,7 @@ export const ColSideBar = ({ category = "Phone Cases", onFilterChange }) => {
 			{/* Mobile Filter Button */}
 			<button
 				onClick={() => setIsMobileOpen(true)}
-				className="fixed bottom-4 right-4 md:hidden z-30 bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center space-x-2"
+				className="fixed bottom-4 right-4 md:hidden z-30 bg-black text-white px-4 py-2 rounded-sm shadow-lg flex items-center space-x-2"
 			>
 				<span>Filters</span>
 				<span className="bg-blue-500 px-2 py-0.5 rounded-full text-sm">
@@ -167,11 +168,14 @@ export const ColSideBar = ({ category = "Phone Cases", onFilterChange }) => {
 				/>
 			)}
 
-			<aside>
-				<div
-					className="flex flex-col h-full w-64 border-r border-gray-100"
-					ref={sidebarRef}
-				>
+			{/* Sidebar */}
+			<aside
+				className={`fixed md:relative inset-y-0 left-0 z-50 md:z-0 w-64 bg-white transform ${
+					isMobileOpen ? "translate-x-0" : "-translate-x-full"
+				} md:translate-x-0 transition-transform duration-300 ease-in-out`}
+				ref={sidebarRef}
+			>
+				<div className="flex flex-col h-full w-64 border-r border-gray-100">
 					{/* Mobile Header */}
 					<div className="flex items-center justify-between p-4 md:hidden border-b border-gray-100">
 						<h2 className="text-lg font-medium">Filters</h2>
@@ -261,7 +265,7 @@ export const ColSideBar = ({ category = "Phone Cases", onFilterChange }) => {
 					<div className="p-4 border-t border-gray-100 md:hidden">
 						<button
 							onClick={handleCloseMobile}
-							className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+							className="w-full bg-gradient-to-br from-amber-600 to-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-400 transition-colors"
 						>
 							Apply Filters
 						</button>

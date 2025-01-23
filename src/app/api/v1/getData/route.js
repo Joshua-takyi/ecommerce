@@ -3,15 +3,12 @@ import { buildQuery, BuildSort } from "@/utils/buildQuery";
 import logger from "@/utils/logger";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
+import { connectDb } from "@/utils/connect";
 export async function GET(req) {
 	try {
 		// Connect to the database
 		if (mongoose.connection.readyState !== 1) {
-			logger.error("failed to connect to database");
-			return NextResponse.json(
-				{ error: "failed to connect to database" },
-				{ status: 500 }
-			);
+			await connectDb();
 		}
 
 		// Parse query parameters

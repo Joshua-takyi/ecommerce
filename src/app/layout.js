@@ -1,4 +1,4 @@
-import { Geist, Space_Mono } from "next/font/google";
+import { Geist, Space_Mono, Open_Sans } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/providers/provider";
 import { Toaster } from "sonner";
@@ -7,6 +7,12 @@ import Nav from "@/components/nav/nav";
 // Load custom fonts using next/font
 const spaceMono = Space_Mono({
 	variable: "--font-space-mono",
+	subsets: ["latin"],
+	weight: ["400", "700"],
+	display: "swap", // Ensure fonts are loaded without blocking the render
+});
+const openSans = Open_Sans({
+	variable: "--font-open-sans",
 	subsets: ["latin"],
 	weight: ["400", "700"],
 	display: "swap", // Ensure fonts are loaded without blocking the render
@@ -20,6 +26,7 @@ const geistSans = Geist({
 
 // Metadata for SEO and social media
 export const metadata = {
+	metadataBase: new URL("https://ecommerce-mu-blush-89.vercel.app"),
 	title: {
 		default: "PhoneXcess | Premium Phone Accessories", // Default title
 		template: "%s | PhoneXcess", // Dynamic title for child pages
@@ -38,7 +45,7 @@ export const metadata = {
 		title: "PhoneXcess | Premium Phone Accessories",
 		description:
 			"Discover premium phone accessories at PhoneXcess. Shop cases, chargers, screen protectors, and more for your favorite devices.",
-		url: "https://www.phonexcess.com", // Replace with your domain
+		url: "https://ecommerce-mu-blush-89.vercel.app/", // Replace with your domain
 		siteName: "PhoneXcess",
 		images: [
 			{
@@ -50,13 +57,6 @@ export const metadata = {
 		],
 		locale: "en_US",
 		type: "website",
-	},
-	twitter: {
-		card: "summary_large_image",
-		title: "PhoneXcess | Premium Phone Accessories",
-		description:
-			"Discover premium phone accessories at PhoneXcess. Shop cases, chargers, screen protectors, and more for your favorite devices.",
-		images: ["https://www.phonexcess.com/og-image.jpg"], // Replace with your OG image URL
 	},
 	robots: {
 		index: true, // Allow search engines to index the page
@@ -83,7 +83,7 @@ export default function RootLayout({ children }) {
 				<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 			</head>
 			<body
-				className={`${spaceMono.className} ${geistSans.variable} antialiased`}
+				className={`${spaceMono.variable} ${geistSans.variable} ${openSans.className} antialiased`}
 			>
 				{/* Toast notifications */}
 				<Toaster richColors position="top-right" />

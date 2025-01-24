@@ -2,9 +2,8 @@ import { connectDb } from "@/utils/connect";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { UserAuth } from "@/models/schema";
-import logger from "@/utils/logger";
 import z from "zod";
-
+import logger from "@/utils/logger";
 // Define validation schema
 const signUpSchema = z.object({
 	name: z.string().min(3).max(30),

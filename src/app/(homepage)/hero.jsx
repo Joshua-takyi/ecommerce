@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 export default function Hero() {
 	return (
 		<motion.div
-			className="bg-gradient-to-br from-amber-600 to-orange-500 min-h-[50dvh] md:min-h-[70dvh] text-white relative overflow-hidden"
+			className="bg-gradient-to-br from-amber-600 to-orange-500 min-h-[50dvh] md:min-h-[70dvh] text-white relative overflow-hidden "
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
 			transition={{ duration: 1 }}
@@ -22,7 +22,7 @@ export default function Hero() {
 					animate={{ y: 0 }}
 					transition={{ duration: 1, ease: "easeOut" }}
 				>
-					<div className="max-w-3xl mx-auto space-y-6">
+					<div className="max-w-3xl mx-auto space-y-6 ">
 						{/* Announcement Badge */}
 						<motion.div
 							className="inline-flex items-center gap-2 bg-amber-500/30 px-4 py-2 rounded-full mx-auto"
@@ -36,7 +36,7 @@ export default function Hero() {
 
 						{/* Hero Heading */}
 						<motion.h1
-							className="font-bold leading-tight"
+							className="font-bold leading-tight font-spaceMono"
 							style={{ fontSize: "clamp(2rem, 4vw, 3.5rem)" }} // h1 font size
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}

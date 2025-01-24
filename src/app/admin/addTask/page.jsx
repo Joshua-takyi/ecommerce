@@ -1,5 +1,5 @@
 import AddTask from "./add";
-import { Metadata } from "next";
+import { Metadata } from "next/types";
 
 export const metadata = {
 	title: "Admin | Add Product",
@@ -12,7 +12,7 @@ export const metadata = {
 		siteName: "Your Store Name",
 		images: [
 			{
-				url: "https://yourdomain.com/og-image.jpg", // Replace with your OG image URL
+				url: "https://ecommerce-mu-blush-89.vercel.app/og-image.jpg", // Replace with your OG image URL
 				width: 1200,
 				height: 630,
 				alt: "Admin Add Product",
@@ -21,12 +21,7 @@ export const metadata = {
 		locale: "en_US",
 		type: "website",
 	},
-	twitter: {
-		card: "summary_large_image",
-		title: "Admin | Add Product",
-		description: "Add a new product to your store.",
-		images: ["https://yourdomain.com/og-image.jpg"], // Replace with your OG image URL
-	},
+
 	robots: {
 		index: false, // Prevent search engines from indexing this page
 		follow: true,

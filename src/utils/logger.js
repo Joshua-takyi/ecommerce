@@ -1,58 +1,39 @@
-import winston from "winston";
+import log from "loglevel";
 import chalk from "chalk";
 
-// Define custom colors for each log level
-const customColors = {
-	info: "blue",
-	error: "red",
-	debug: "green",
+// Set the default log level (e.g., 'info' for production, 'debug' for development)
+log.setDefaultLevel(log.levels.INFO);
+
+// Customize log format and colors
+const originalFactory = log.methodFactory;
+log.methodFactory = function (methodName, logLevel, loggerName) {
+	const rawMethod = originalFactory(methodName, logLevel, loggerName);
+
+	return function (message) {
+		const timestamp = new Date().toISOString();
+		let formattedMessage = `${timestamp} [${methodName.toUpperCase()}]: ${message}`;
+
+		// Apply colors using chalk
+		switch (methodName) {
+			case "info":
+				formattedMessage = chalk.blue(formattedMessage);
+				break;
+			case "error":
+				formattedMessage = chalk.red(formattedMessage);
+				break;
+			case "debug":
+				formattedMessage = chalk.green(formattedMessage);
+				break;
+			default:
+				break;
+		}
+
+		rawMethod(formattedMessage);
+	};
 };
 
-// Add colors to winston
-winston.addColors(customColors);
+// Rebuild the logger with the custom method factory
+log.setLevel(log.getLevel()); // Apply the customizations
 
-// Create a logger instance
-const logger = winston.createLogger({
-	levels: winston.config.syslog.levels, // Use syslog levels (includes info, error, debug)
-	format: winston.format.combine(
-		winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }), // Add timestamp
-		winston.format.printf((log) => {
-			// Apply colors to log messages using chalk
-			let message = `${log.timestamp} [${log.level.toUpperCase()}]: ${
-				log.message
-			}`;
-			switch (log.level) {
-				case "info":
-					message = chalk.blue(message);
-					break;
-				case "error":
-					message = chalk.red(message);
-					break;
-				case "debug":
-					message = chalk.green(message);
-					break;
-				default:
-					break;
-			}
-			return message;
-		})
-	),
-	transports: [
-		// Log to the console
-		new winston.transports.Console({
-			level: "debug", // Log everything up to debug level
-		}),
-	],
-});
-
-// Add file transport only if it's not in production (for local development)
-if (process.env.NODE_ENV !== "production") {
-	logger.add(
-		new winston.transports.File({
-			filename: "logs/app.log", // Save logs to a file
-			level: "error", // Log only errors to the file
-		})
-	);
-}
-
-export default logger;
+// Export the configured logger as `logger`
+export default log;

@@ -57,26 +57,33 @@ export default function Nav() {
 						)}
 					</button>
 
-					{/* Desktop Navigation */}
-					<div className="hidden md:flex items-center space-x-4 justify-center">
-						<DropdownMenu header="Products" items={categories} />
-						<DropdownMenu header="Brands" items={categories} />
-						<DropdownMenu header="Categories" items={categories} />
-					</div>
-
 					{/* Logo */}
 					<header className="font-gotham_thin text-xl md:text-2xl font-bold">
 						<Link href="/">PhoneXcess</Link>
 					</header>
 
+					{/* Desktop Navigation - Centered */}
+					<div className="hidden md:flex items-center justify-center flex-1">
+						<div className="flex items-center space-x-4">
+							<DropdownMenu header="Products" items={categories} />
+							<DropdownMenu header="Brands" items={categories} />
+							<DropdownMenu header="Categories" items={categories} />
+						</div>
+					</div>
+
 					{/* Icons */}
 					<div className="flex items-center gap-2">
-						<Link
-							href="/cart"
-							className="hover:text-gray-600 transition-colors p-2"
-						>
-							<ShoppingCart className="w-5 h-5" />
-						</Link>
+						<div className="relative">
+							<Link
+								href="/cart"
+								className="hover:text-gray-600 transition-colors p-2"
+							>
+								<ShoppingCart className="w-5 h-5" />
+							</Link>
+							<div className="absolute top-0 right-0 bg-red-500 text-white px-2 py-1 text-xs rounded-full">
+								10
+							</div>
+						</div>
 						<Link
 							href="/wishlist"
 							className="hover:text-gray-600 transition-colors p-2"

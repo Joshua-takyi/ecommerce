@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
-import logger from "./logger";
+import log from "./logger";
 
 export const connectDb = async () => {
 	if (mongoose.connections[0].readyState) {
-		logger.info("Already connected to MongoDB");
+		log.info("Already connected to MongoDB");
 		return;
 	}
 
@@ -13,9 +13,9 @@ export const connectDb = async () => {
 
 	try {
 		await mongoose.connect(process.env.MONGODB_URI);
-		logger.info("Connected to MongoDB");
+		log.info("Connected to MongoDB");
 	} catch (error) {
-		logger.error("MongoDB connection error:", error);
+		log.error("MongoDB connection error:", error);
 		throw error; // Re-throw the error to be handled by the caller
 	}
 };

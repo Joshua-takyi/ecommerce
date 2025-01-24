@@ -4,6 +4,7 @@ import logger from "@/utils/logger";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import { connectDb } from "@/utils/connect";
+
 export async function GET(req) {
 	try {
 		// Connect to the database
@@ -15,19 +16,27 @@ export async function GET(req) {
 		const searchParams = req.nextUrl.searchParams;
 		const sortBy = searchParams.get("sortBy");
 		const order = searchParams.get("order");
-		const page = parseInt(searchParams.get("page")) || 1; // Default to page 1
-		const limit = parseInt(searchParams.get("limit")) || 10; // Default to 10 items per page
+		const page = parseInt(searchParams.get("page")) || 1;
+		const limit = parseInt(searchParams.get("limit")) || 10;
 		const skip = (page - 1) * limit;
 
 		// Build query and sort
-		const query = buildQuery(searchParams);
-		const sort = BuildSort(sortBy, order);
+		const matchStage = buildQuery(searchParams);
+		const sortStage = BuildSort(sortBy, order);
 
-		// Fetch products and total count in parallel
-		const [products, total] = await Promise.all([
-			Product.find(query).sort(sort).skip(skip).limit(limit).lean(),
-			Product.countDocuments(query),
+		// Use aggregation pipeline
+		const [result] = await Product.aggregate([
+			{ $match: matchStage },
+			{
+				$facet: {
+					data: [{ $sort: sortStage }, { $skip: skip }, { $limit: limit }],
+					totalCount: [{ $count: "count" }],
+				},
+			},
 		]);
+
+		const products = result.data;
+		const total = result.totalCount[0]?.count || 0;
 
 		// Return response with pagination metadata
 		return NextResponse.json({

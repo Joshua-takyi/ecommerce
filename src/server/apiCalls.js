@@ -1,3 +1,4 @@
+import { GetSession } from "@/utils/session";
 import axios from "axios";
 
 // sign up
@@ -84,7 +85,14 @@ export async function GetByCategory({
 
 export async function GetProduct({ slug }) {
 	try {
-		const res = await axios.get(`${API_URL}/v1/getData/${slug}`);
+		// Use axios without any auth headers for public product data
+		const res = await axios.get(`${API_URL}/v1/getData/${slug}`, {
+			headers: {
+				"Cache-Control": "no-cache",
+				Pragma: "no-cache",
+			},
+		});
+
 		if (res.status !== 200) {
 			throw new Error(res.data.message || "Failed to fetch product data");
 		}
@@ -98,3 +106,37 @@ export async function GetProduct({ slug }) {
 		throw new Error(error.message || "An unexpected error occurred");
 	}
 }
+
+export const AddToCart = async (data) => {
+	const session = await GetSession();
+	const accessToken = session?.user?.accessToken;
+	try {
+		const res = await axios.post(`${API_URL}/v1/cart`, data, {
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+				"Content-Type": "application/json",
+			},
+		});
+
+		if (res.status === 401) {
+			throw new Error("Session expired. Please sign in again.");
+		}
+
+		if (res.status !== 201) {
+			throw new Error(res.data?.message || "Failed to add product to cart");
+		}
+
+		return res.data;
+	} catch (error) {
+		// Handle specific error types
+		if (axios.isAxiosError(error)) {
+			if (error.response?.status === 401) {
+				throw new Error("Session expired. Please sign in again.");
+			}
+			throw new Error(
+				error.response?.data?.message || "Failed to add item to cart"
+			);
+		}
+		throw new Error(error.message || "An unexpected error occurred");
+	}
+};

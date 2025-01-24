@@ -38,6 +38,8 @@ export default function ColPage() {
 			});
 			return res.data;
 		},
+		staleTime: 1000 * 60 * 5,
+		cacheTime: 1000 * 60 * 30,
 	});
 
 	if (isLoading)

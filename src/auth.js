@@ -3,7 +3,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { UserAuth } from "./models/schema";
 import { connectDb } from "./utils/connect";
-import logger from "./utils/logger";
+import jwt from "jsonwebtoken";
+import { log } from "loglevel";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
 	providers: [
@@ -29,13 +30,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 						throw new Error("Invalid email or password");
 					}
 
+					// Generate JWT
+					const accessToken = jwt.sign(
+						{ id: user._id, name: user.name, role: user.role },
+						process.env.JWT_SECRET,
+						{
+							expiresIn: "1h",
+						}
+					);
+
+					// Return user data with accessToken
 					return {
 						id: user._id,
 						name: user.name,
 						role: user.role,
+						accessToken: accessToken,
 					};
 				} catch (error) {
-					logger.error("Error during sign-in:", error);
+					log.error("Error during sign-in:", error);
 					throw new Error("An unexpected error occurred during sign-in");
 				}
 			},
@@ -50,33 +62,50 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 	},
 	callbacks: {
 		async jwt({ token, user }) {
+			// Add user data to the token
 			if (user) {
 				token.id = user.id;
 				token.role = user.role;
+				token.accessToken = user.accessToken; // Add accessToken to the token
 			}
 			return token;
 		},
 		async session({ session, token }) {
+			// Add token data to the session
 			if (token) {
 				session.user.id = token.id;
 				session.user.role = token.role;
+				session.user.accessToken = token.accessToken; // Add accessToken to the session
 			}
 			return session;
 		},
-
-		signIn: async ({ user, account }) => {
+		async signIn({ user, account }) {
 			if (account?.provider === "credentials") {
-				logger.info("Sign in with credentials");
+				log.info("Sign in with credentials");
 				return true;
 			}
 
 			if (account?.provider === "google") {
 				const { email, name, image } = user;
+				await connectDb();
 				const existingUser = await UserAuth.findOne({ email });
 				if (!existingUser) {
 					await UserAuth.create({ email, name, image });
 				}
-				logger.info("Sign in with google");
+
+				// Generate JWT for Google sign-in
+				const accessToken = jwt.sign(
+					{ id: existingUser?._id || email, name, role: "user" },
+					process.env.JWT_SECRET,
+					{
+						expiresIn: "1h",
+					}
+				);
+
+				// Add accessToken to the user object
+				user.accessToken = accessToken;
+
+				log.info("Sign in with google");
 				return true;
 			}
 			return false;

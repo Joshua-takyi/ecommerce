@@ -8,6 +8,9 @@ export default {
 	],
 	theme: {
 		extend: {
+			fontFamily: {
+				spaceMono: "var(--font-space-mono)",
+			},
 			colors: {
 				background: "var(--background)",
 				foreground: "var(--foreground)",

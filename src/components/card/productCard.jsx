@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import { redirect } from "next/navigation";
 
 const formatCurrency = (price) =>
-	new Intl.NumberFormat("en-GH", { style: "currency", currency: "GHc" }).format(
+	new Intl.NumberFormat("en-GH", { style: "currency", currency: "GHS" }).format(
 		price
 	);
 
